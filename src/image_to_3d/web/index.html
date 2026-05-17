@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Image &rarr; 3D</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module"
+    src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>Image &rarr; 3D</h1>
+      <p class="sub">Drop a photo of a single object &mdash; get a 3D model. Runs
+        locally, free, no limits.</p>
+    </header>
+
+    <section id="dropzone" class="dropzone" tabindex="0">
+      <input id="file-input" type="file" accept="image/*" hidden />
+      <p class="dz-text">Drag &amp; drop an image here, or <button id="browse"
+        type="button" class="link">browse</button></p>
+      <img id="preview" alt="" hidden />
+    </section>
+
+    <section class="controls">
+      <label for="resolution">Detail
+        <select id="resolution">
+          <option value="128">Fast (low detail)</option>
+          <option value="192" selected>Balanced</option>
+          <option value="256">High (slow)</option>
+        </select>
+      </label>
+      <button id="generate" type="button" disabled>Generate 3D model</button>
+    </section>
+
+    <section id="status" class="status" hidden>
+      <div class="spinner" aria-hidden="true"></div>
+      <span id="status-text">Working&hellip;</span>
+    </section>
+
+    <section id="error" class="error" hidden></section>
+
+    <section id="result" class="result" hidden>
+      <model-viewer id="viewer" camera-controls auto-rotate
+        shadow-intensity="1" exposure="1" ar></model-viewer>
+      <div class="meta" id="meta"></div>
+      <div class="downloads" id="downloads"></div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -5,5 +5,9 @@ venv/
 outputs/
 *.glb
 *.obj
+*.stl
 model_cache/
 .pytest_cache/
+*.egg-info/
+setup_log.txt
+e2e_log.txt

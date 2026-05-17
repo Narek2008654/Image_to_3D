@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "image-to-3d"
+version = "0.1.0"
+description = "Free, local, CPU-only single-image to 3D mesh tool (TripoSR + PyMCubes)"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = { text = "MIT" }
+dependencies = [
+    "torch==2.2.2",
+    "torchvision==0.17.2",
+    # 4.40.2 pulls tokenizers 0.19 (prebuilt cp312 wheels); API-compatible
+    # with TripoSR's ViT/DINO backbone. Older 4.35 forced a Rust build.
+    "transformers==4.40.2",
+    "omegaconf==2.3.0",
+    "einops==0.7.0",
+    "Pillow==10.1.0",
+    "numpy<2",
+    "rembg==2.0.59",
+    "onnxruntime==1.17.3",
+    # 0.1.6 ships prebuilt cp312 wheels; 0.1.4 forced a C++ source build.
+    "PyMCubes==0.1.6",
+    "trimesh==4.0.5",
+    "huggingface-hub",
+    "fastapi==0.110.0",
+    "uvicorn==0.29.0",
+    "python-multipart==0.0.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.1.1", "httpx==0.27.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: end-to-end tests that run the real TripoSR model (deselected by default)",
+]
+addopts = "-m 'not slow'"
+testpaths = ["tests"]

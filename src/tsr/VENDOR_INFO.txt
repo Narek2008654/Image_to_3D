@@ -1,0 +1,5 @@
+source: https://github.com/VAST-AI-Research/TripoSR
+ref: main
+archive_top: TripoSR-main
+fetched_utc: 2026-05-17T18:37:07.913175+00:00
+patch: patches/isosurface_pymcubes.py (torchmcubes -> PyMCubes)
