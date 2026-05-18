@@ -1,3 +1,14 @@
+---
+title: Image To 3D
+emoji: 🧊
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # Image → 3D
 
 Turn **one 2D photo of an object** into a **rotatable, downloadable 3D model**.
@@ -41,6 +52,42 @@ python scripts/setup_env.py
 Open <http://localhost:8000>, drop in a photo, and download the result.
 First reconstruction downloads the model weights (~2 GB, one time); after that
 it works fully offline. Expect **~30 s – 2 min per image** on a laptop CPU.
+
+## Remote access (use it from your phone, free)
+
+Two free paths — no cost, no API keys, no usage caps.
+
+### Path A — your laptop, reachable anywhere (fast)
+
+Your laptop runs it; a free Cloudflare tunnel exposes it over HTTPS so any
+device on any network can reach it.
+
+```sh
+.venv\Scripts\python scripts\share.py
+```
+
+It prints a public `https://<random>.trycloudflare.com` URL. Open that on your
+phone (works on mobile data). Full speed, truly unlimited. The laptop must
+stay awake and online; the URL changes each run (Cloudflare Quick Tunnel is
+ephemeral — a stable URL would need an owned domain).
+
+### Path B — Hugging Face Space (works with the laptop off)
+
+This repo is also a Hugging Face **Docker Space** (see the header at the top of
+this file and the `Dockerfile`). Push it to a public HF Space and it runs in
+the cloud for free:
+
+```sh
+git remote add hf https://huggingface.co/spaces/<your-username>/image-to-3d
+git push hf master
+```
+
+Then open the Space URL on any device, anytime — no laptop needed.
+
+Honest free-tier behaviour (expected, not bugs): the Space **sleeps after
+~48 h idle** and takes ~1–2 min to wake; storage is ephemeral so the ~2 GB
+model re-downloads on the first request after a cold start; the shared CPU is
+roughly laptop-speed. Still $0, with no usage caps.
 
 ## Architecture
 

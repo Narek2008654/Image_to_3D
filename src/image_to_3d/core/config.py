@@ -7,8 +7,14 @@ Callers may override any field per request.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
+
+# Containers (e.g. the Hugging Face Space) run as a non-root user where only
+# /tmp is writable, so the output location must be overridable via the
+# environment. Unset -> unchanged local behaviour.
+OUTPUT_DIR_ENV = "IMAGE_TO_3D_OUTPUT_DIR"
 
 MODEL_ID = "stabilityai/TripoSR"
 
@@ -17,7 +23,7 @@ EXPORT_FORMATS: tuple[str, ...] = ("glb", "obj", "stl")
 
 
 def _default_output_dir() -> Path:
-    return Path("outputs").resolve()
+    return Path(os.environ.get(OUTPUT_DIR_ENV, "outputs")).resolve()
 
 
 @dataclass(slots=True)

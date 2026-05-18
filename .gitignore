@@ -11,3 +11,5 @@ model_cache/
 *.egg-info/
 setup_log.txt
 e2e_log.txt
+docker_build_log.txt
+scripts/bin/

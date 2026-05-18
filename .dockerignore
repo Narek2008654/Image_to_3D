@@ -1,0 +1,14 @@
+.git/
+.venv/
+venv/
+outputs/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+setup_log.txt
+e2e_log.txt
+scripts/bin/
+src/tsr/
+docs/
