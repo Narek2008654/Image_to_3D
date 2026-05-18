@@ -20,6 +20,14 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+# cloudflared logs Unicode (box drawing); Windows stdout defaults to cp1252
+# and would raise UnicodeEncodeError when we echo those lines.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 ROOT = Path(__file__).resolve().parent.parent
 BIN_DIR = ROOT / "scripts" / "bin"
 PORT = 8000
@@ -110,6 +118,41 @@ def _banner(url: str) -> None:
     print("Keep this window open. Press Ctrl+C to stop.\n")
 
 
+def _run_tunnel(cloudflared: Path) -> tuple[int, bool]:
+    """Run one cloudflared session. Returns (exit_code, announced_a_url)."""
+    tunnel = subprocess.Popen(
+        [str(cloudflared), "tunnel", "--url", LOCAL_URL],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        # cloudflared emits non-cp1252 bytes; without this, the default
+        # Windows locale codec raises UnicodeDecodeError mid-stream.
+        encoding="utf-8",
+        errors="replace",
+        bufsize=1,
+    )
+    announced = False
+    try:
+        assert tunnel.stdout is not None
+        # readline() (not `for line in pipe`) so each line surfaces
+        # immediately; the iterator form read-ahead-buffers and would hide
+        # the URL until the process exits.
+        while True:
+            raw = tunnel.stdout.readline()
+            if not raw:
+                break
+            line = raw.rstrip()
+            print(line, flush=True)
+            if not announced:
+                match = _TRYCF_RE.search(line)
+                if match:
+                    _banner(match.group(0))
+                    announced = True
+        return tunnel.wait(), announced
+    finally:
+        tunnel.terminate()
+
+
 def main() -> int:
     cloudflared = _ensure_cloudflared()
 
@@ -119,30 +162,30 @@ def main() -> int:
     else:
         server = _start_server()
 
-    tunnel = subprocess.Popen(
-        [str(cloudflared), "tunnel", "--url", LOCAL_URL],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,
-    )
+    # trycloudflare.com is best-effort and intermittently 500s before a tunnel
+    # connects. Retry those early failures; once a URL is announced the session
+    # is real, so its exit is final and not retried.
+    attempts = 4
     try:
-        announced = False
-        assert tunnel.stdout is not None
-        for raw in tunnel.stdout:
-            line = raw.rstrip()
-            print(line)
-            if not announced:
-                match = _TRYCF_RE.search(line)
-                if match:
-                    _banner(match.group(0))
-                    announced = True
-        return tunnel.wait()
+        for attempt in range(1, attempts + 1):
+            code, announced = _run_tunnel(cloudflared)
+            if announced:
+                return code
+            if attempt < attempts:
+                print(
+                    f"Cloudflare quick tunnel unavailable (transient). "
+                    f"Retrying {attempt}/{attempts - 1} ..."
+                )
+                time.sleep(5)
+        print(
+            "Could not establish a Cloudflare quick tunnel after retries "
+            "(their free service is returning errors). Try again shortly."
+        )
+        return 1
     except KeyboardInterrupt:
         print("\nShutting down ...")
         return 0
     finally:
-        tunnel.terminate()
         if server is not None:
             server.terminate()
 

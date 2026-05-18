@@ -12,4 +12,5 @@ model_cache/
 setup_log.txt
 e2e_log.txt
 docker_build_log.txt
+hf_build_log.txt
 scripts/bin/
