@@ -17,6 +17,8 @@ ENV HOME=/home/user \
     PATH=/usr/local/bin:$PATH \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
+    PIP_DEFAULT_TIMEOUT=120 \
+    PIP_RETRIES=5 \
     IMAGE_TO_3D_OUTPUT_DIR=/tmp/outputs \
     HF_HOME=/tmp/huggingface \
     U2NET_HOME=/tmp/u2net \
@@ -26,10 +28,10 @@ ENV HOME=/home/user \
 WORKDIR /home/user/app
 
 # Dependencies first for layer caching. torch/torchvision from the CPU index.
-RUN pip install --upgrade pip \
-    && pip install --index-url https://download.pytorch.org/whl/cpu \
-        torch==2.2.2 torchvision==0.17.2 \
-    && pip install \
+# Split into separate RUNs so a slow-network failure retries less work.
+RUN pip install --index-url https://download.pytorch.org/whl/cpu \
+        torch==2.2.2 torchvision==0.17.2
+RUN pip install \
         transformers==4.40.2 omegaconf==2.3.0 einops==0.7.0 Pillow==10.1.0 \
         "numpy<2" rembg==2.0.59 onnxruntime==1.17.3 PyMCubes==0.1.6 \
         trimesh==4.0.5 huggingface-hub fastapi==0.110.0 uvicorn==0.29.0 \

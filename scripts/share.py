@@ -81,7 +81,7 @@ def _venv_python() -> str:
 
 
 def _start_server() -> subprocess.Popen:
-    print("Starting the app server on :%d ..." % PORT)
+    print(f"Starting the app server on :{PORT} ...")
     proc = subprocess.Popen(
         [
             _venv_python(),
